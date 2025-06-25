@@ -1,58 +1,81 @@
 <template>
-    <div class="component-list">
-        <h3>组件库</h3>
-        <draggable :list="materials" :group="{ name: 'componentsGroup', pull: 'clone', put: false }"
-            :clone="cloneComponent" item-key="componentName" :sort="false">
-            <template #item="{ element }">
-                <div class="component-item">
-                    <el-icon>
-                        <component :is="element.icon" />
-                    </el-icon>
-                    <span>{{ element.title }}</span>
-                </div>
-            </template>
-        </draggable>
-    </div>
+    <el-tabs v-model="activeTab" class="left-panel-tabs">
+        <el-tab-pane label="组件库" name="components">
+            <div class="component-list">
+                <draggable :list="materials" :group="{ name: 'componentsGroup', pull: 'clone', put: false }"
+                    :clone="cloneComponent" item-key="componentName" :sort="false">
+                    <template #item="{ element }">
+                        <div class="component-item">
+                            <el-icon>
+                                <component :is="element.icon" />
+                            </el-icon>
+                            <span>{{ element.title }}</span>
+                        </div>
+                    </template>
+                </draggable>
+            </div>
+        </el-tab-pane>
+        <el-tab-pane label="大纲树" name="outline">
+            <!-- [新增] 引入大纲树组件 -->
+            <OutlineTree />
+        </el-tab-pane>
+    </el-tabs>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import draggable from 'vuedraggable-es'
 import { materials, materialsMap } from '@/components/materials'
 import type { ComponentMeta, ComponentSchema } from '@/types/ast'
 import { nanoid } from 'nanoid'
+// [新增] 引入新的大纲树组件
+import OutlineTree from './OutlineTree.vue'
 
-// 拖拽克隆时调用的函数
+const activeTab = ref('components')
+
 const cloneComponent = (meta: ComponentMeta): ComponentSchema => {
     const componentMeta = materialsMap.get(meta.componentName)
     if (!componentMeta) {
         throw new Error('Component not found')
     }
 
-    // 根据元信息创建新的组件Schema
     const newComponent: ComponentSchema = {
         id: nanoid(6),
         componentName: componentMeta.componentName,
         props: {},
     }
 
-    // 设置默认属性值
     componentMeta.props.forEach(prop => {
         if (prop.defaultValue !== undefined) {
             newComponent.props[prop.name] = prop.defaultValue
         }
     })
 
-    // 如果是容器组件，添加children数组
-    if (componentMeta.componentName === 'ElRow') {
-        newComponent.children = []
+    if (Array.isArray(materialsMap.get(meta.componentName)?.props)) {
+        if (meta.componentName === 'ElRow') {
+            newComponent.children = []
+        }
     }
+
 
     return newComponent
 }
 </script>
 
 <style scoped>
-.component-list {
+.left-panel-tabs {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.left-panel-tabs> :deep(.el-tabs__content) {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.component-list,
+.outline-tree-container {
     padding: 10px;
 }
 
@@ -65,6 +88,7 @@ const cloneComponent = (meta: ComponentMeta): ComponentSchema => {
     border-radius: 4px;
     cursor: grab;
     background-color: #fff;
+    transition: all 0.2s;
 }
 
 .component-item:hover {

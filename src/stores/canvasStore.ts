@@ -18,6 +18,21 @@ function findNodeById(
   return null;
 }
 
+function findAndRemoveNodeById(tree: ComponentSchema[], id: string): boolean {
+  for (let i = 0; i < tree.length; i++) {
+    if (tree[i].id === id) {
+      tree.splice(i, 1);
+      return true;
+    }
+    if (tree[i].children) {
+      if (findAndRemoveNodeById(tree[i].children!, id)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 export const useCanvasStore = defineStore("canvas", () => {
   // 页面全局Schema
   const pageSchema = ref<PageSchema>({
@@ -71,6 +86,25 @@ export const useCanvasStore = defineStore("canvas", () => {
     }
   }
 
+  function deleteComponent(id: string) {
+    if (!id) return;
+    findAndRemoveNodeById(pageSchema.value.children, id);
+    // 如果删除的是当前选中的组件，清空选中状态
+    if (activeComponentId.value === id) {
+      activeComponentId.value = null;
+    }
+  }
+
+  function undo() {
+    // @ts-ignore
+    this.undo();
+  }
+
+  function redo() {
+    // @ts-ignore
+    this.redo();
+  }
+
   return {
     pageSchema,
     activeComponentId,
@@ -78,5 +112,8 @@ export const useCanvasStore = defineStore("canvas", () => {
     setActiveComponentId,
     updateComponentProps,
     updateChildren,
+    deleteComponent,
+    undo,
+    redo,
   };
 });
