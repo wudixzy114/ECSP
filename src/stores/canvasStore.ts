@@ -51,10 +51,32 @@ export const useCanvasStore = defineStore("canvas", () => {
     activeComponentId.value = id;
   }
 
+  function updateComponentProps(id: string, propName: string, value: any) {
+    const component = findNodeById(pageSchema.value.children, id);
+    if (component) {
+      component.props[propName] = value;
+    }
+  }
+
+  function updateChildren(parentId: string, newChildren: ComponentSchema[]) {
+    const parentNode =
+      parentId === "root"
+        ? pageSchema.value
+        : findNodeById(pageSchema.value.children, parentId);
+
+    if (parentNode) {
+      parentNode.children = newChildren;
+    } else {
+      console.error("Parent node not found:", parentId);
+    }
+  }
+
   return {
     pageSchema,
     activeComponentId,
     activeComponent,
     setActiveComponentId,
+    updateComponentProps,
+    updateChildren,
   };
 });
