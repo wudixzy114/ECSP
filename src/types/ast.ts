@@ -14,6 +14,7 @@ export interface ComponentMeta {
   icon?: string;
   props: ComponentProp[];
   events?: Record<string, string>;
+  defaultSchema?: ComponentSchema;
 }
 
 // 画布中的一个组件实例节点
@@ -22,7 +23,7 @@ export interface ComponentSchema {
   componentName: string;
   props: Record<string, any>;
   children?: ComponentSchema[];
-  // style: Record<string, any>; // 暂不实现
+  style: Record<string, any>; // 暂不实现
   // events: Record<string, any>; // 暂不实现
 }
 
@@ -32,4 +33,5 @@ export interface PageSchema {
   componentName: "Page";
   props: Record<string, any>;
   children: ComponentSchema[];
+  style?: Record<string, any>;
 }

@@ -48,6 +48,7 @@ export const useCanvasStore = defineStore("canvas", () => {
           type: "primary",
           text: "我是静态按钮",
         },
+        style: {},
       },
     ],
   });
@@ -105,6 +106,17 @@ export const useCanvasStore = defineStore("canvas", () => {
     this.redo();
   }
 
+  function updateComponentStyle(
+    id: string,
+    newStyleObject: Record<string, any>
+  ) {
+    const component = findNodeById(pageSchema.value.children, id);
+    if (component) {
+      // 使用对象扩展确保我们是合并样式，而不是完全替换
+      component.style = { ...component.style, ...newStyleObject };
+    }
+  }
+
   return {
     pageSchema,
     activeComponentId,
@@ -113,6 +125,7 @@ export const useCanvasStore = defineStore("canvas", () => {
     updateComponentProps,
     updateChildren,
     deleteComponent,
+    updateComponentStyle,
     undo,
     redo,
   };

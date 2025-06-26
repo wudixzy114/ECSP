@@ -39,10 +39,29 @@ const cloneComponent = (meta: ComponentMeta): ComponentSchema => {
         throw new Error('Component not found')
     }
 
+    if (componentMeta.defaultSchema) {
+        // 1. 深拷贝预设的 Schema，防止修改原始 meta
+        const newSchema = JSON.parse(JSON.stringify(componentMeta.defaultSchema));
+
+        // 2. 递归地为所有节点分配新的、唯一的ID
+        const assignNewIds = (node: ComponentSchema) => {
+            node.id = nanoid(6);
+            if (node.children) {
+                node.children.forEach(assignNewIds);
+            }
+        };
+        assignNewIds(newSchema);
+
+        // 3. 将这个完整的、带子节点的结构返回
+        return newSchema;
+    }
+
+
     const newComponent: ComponentSchema = {
         id: nanoid(6),
         componentName: componentMeta.componentName,
         props: {},
+        style: {},
     }
 
     componentMeta.props.forEach(prop => {
@@ -52,11 +71,10 @@ const cloneComponent = (meta: ComponentMeta): ComponentSchema => {
     })
 
     if (Array.isArray(materialsMap.get(meta.componentName)?.props)) {
-        if (meta.componentName === 'ElRow') {
+        if (meta.componentName === 'ElRow' || meta.componentName === 'DataCard') {
             newComponent.children = []
         }
     }
-
 
     return newComponent
 }

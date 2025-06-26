@@ -1,11 +1,22 @@
 <template>
-    <div class="renderer-wrapper"
+    <div class="renderer-wrapper" :style="schema.style"
         :class="{ active: store.activeComponentId === schema.id, 'is-container': isContainer }"
         @click.stop="handleSelectComponent">
         <component :is="componentMap[schema.componentName]" v-bind="filteredProps" class="render-component-inner">
             <!-- 我们自定义的 text prop 只在这里使用，通过插槽传递给按钮 -->
             <template v-if="schema.componentName === 'ElButton'">
                 {{ schema.props.text || '按钮' }}
+            </template>
+
+            <!-- [新增] 纯文本组件内容 -->
+            <template v-if="schema.componentName === 'ElText'">
+                {{ schema.props.text || '文本' }}
+            </template>
+
+            <!-- [新增] 选择器选项示例 -->
+            <template v-if="schema.componentName === 'ElSelect'">
+                <el-option label="选项一" value="1" />
+                <el-option label="选项二" value="2" />
             </template>
 
             <template v-if="isContainer">
@@ -23,7 +34,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { ElButton, ElRow } from 'element-plus';
+import { ElButton, ElRow, ElInput, ElSelect, ElOption, ElText } from 'element-plus';
+import DataCard from '@/components/materials/DataCard/DataCard.vue'; // 
 import draggable from 'vuedraggable-es';
 import type { ComponentSchema } from '@/types/ast';
 import { useCanvasStore } from '@/stores/canvasStore';
@@ -44,6 +56,10 @@ const filteredProps = computed(() => {
         delete realProps.text;
     }
 
+    if (props.schema.componentName === 'ElButton' || props.schema.componentName === 'ElText') {
+        delete realProps.text;
+    }
+
     // 未来如果其他组件也有类似冲突，可以在此扩展
     // if (props.schema.componentName === 'SomeOtherComponent') {
     //   delete realProps.customProp;
@@ -55,6 +71,11 @@ const filteredProps = computed(() => {
 const componentMap: Record<string, any> = {
     ElButton,
     ElRow,
+    ElInput,
+    ElSelect,
+    ElOption,
+    ElText,
+    DataCard,
 };
 
 const store = useCanvasStore();

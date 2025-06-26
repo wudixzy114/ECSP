@@ -11,7 +11,7 @@ const HISTORY_ACTIONS = new Set([
   "updateComponentProps", // 修改属性
   "deleteComponent", // 删除组件
   "cloneComponent", // 从左侧拖拽添加新组件 (尽管clone本身不修改store，但其后续的拖放会触发updateChildren)
-  // 我们暂时将其加入，未来可优化为只监听拖放结束的action
+  "updateComponentStyle", // 我们暂时将其加入，未来可优化为只监听拖放结束的action
 ]);
 
 export function historyPlugin({ store }: PiniaPluginContext) {
